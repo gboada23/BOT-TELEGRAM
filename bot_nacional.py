@@ -13,7 +13,8 @@ logging.basicConfig(
     level=logging.ERROR)
 
 def error(update, context):
-    """Manejar las excepciones"""
+   
+    "Manejar las excepciones"
     logging.error(f'Error: {context.error}')
     update.message.reply_text('Hubo un error. Pero sigo trabajando')
 
@@ -290,26 +291,21 @@ def Nombres(update, context):
     if not anti_join.empty:
         titulo2 = f"Operarios faltantes por Cargar hoy {hoy}"
         mensaje_faltantes = titulo2 + '\n\n'
-
         for i in range(len(anti_join)):
             FALTANTES = str((anti_join['OPERARIO'].iloc[i])) +' ❌'+ '\n' + str((anti_join['REGIONAL'].iloc[i])) + '\n' + str((anti_join['AGENCIA'].iloc[i]))
             mensaje_faltantes += FALTANTES + '\n\n'
-
         context.bot.send_message(chat_id=update.effective_chat.id, text=mensaje_faltantes)
     else:
-        empty = f"Todos los operarios de {hoy} fueron cargados exitosamente ✅"
-        update.message.reply_text(empty)
-
+        mensaje_faltantes = f"Todos los operarios de {hoy} fueron cargados exitosamente ✅"
+        context.bot.send_message(chat_id=update.effective_chat.id, text=mensaje_faltantes)
 def Numeros(update, context):
     global anti_join2
     if not anti_join2.empty:
         titulo2 = f"Operarios faltantes por cargar agrupados por region al {hoy}\n"
         mensaje_faltantes = titulo2 + '\n'
-
         for i in range(len(anti_join2)):
             FALTANTES = str((anti_join2['REGIONAL'].iloc[i]))+' ❌' + '\n' +  str((anti_join2['OPERARIO'].iloc[i]))
             mensaje_faltantes += FALTANTES + '\n\n'
-
         context.bot.send_message(chat_id=update.effective_chat.id, text=mensaje_faltantes)
     else:
         empty = f"Todos los operarios de {hoy} fueron cargados exitosamente ✅"
@@ -416,21 +412,39 @@ def Bolsas(update, context):
       worksheet.update_cells(cell_list)
   longitud = len(df)
   context.bot.send_message(chat_id=update.effective_chat.id, text=f'Archivo-Bolsa de Nacionales generado correctamente para {longitud} operarios ✅\n\n' + 'Podras visualizarlo aqui:\n\n' + 'https://docs.google.com/spreadsheets/d/1s5uB8JJN6lJVzrREETWmTinwC3NkCBdABeTVTYg_1vA/edit?usp=sharing')
-def recordatorio(contexto):
-   mensaje = "Son las 2 pm, recuerda verificar si todos los operarios fueron cargados"
-   contexto.bot.send_message(chat_id=-1001835769403, text=mensaje)
-def print_chat_id(update, context):
-    chat_id = update.effective_chat.id
-    print(f"Chat ID is: {chat_id}")
 
+def recordatorio(contexto):
+  now = dt_time.strftime(dt_time.now(), "%I:%M %p")
+  contexto.bot.send_message(chat_id=-1001835769403, text="<b>ALERTA ⚠️\n\n</b>" + f"Son las {now}, recuerda verificar si todos los operarios fueron cargados en 10 minutos verificaré cuantos faltan por cargar", parse_mode='HTML')
+     
+def recordar(contexto):
+  global anti_join
+  global anti_join2
+  now = dt_time.strftime(dt_time.now(), "%I:%M %p")
+  if anti_join.empty == False and len(anti_join)< 15:
+    titulo2 = "ALERTA ⚠️\n\n" + f"Son las {now}, y aún faltan operarios por cargar en la app. aqui te dejo el listado para que los carguen lo mas pronto posible"
+    mensaje_incidencias = titulo2 + '\n\n'
+    for i in range(len(anti_join)):
+        FALTANTES = str((anti_join['OPERARIO'].iloc[i])) +' ❌'+ '\n' + str((anti_join['REGIONAL'].iloc[i])) + '\n' + str((anti_join['AGENCIA'].iloc[i]))
+        mensaje_incidencias += FALTANTES + '\n\n'
+    contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
+  elif anti_join.empty == False and len(anti_join)>= 15:
+    titulo2 = "ALERTA ⚠️\n\n" + f"Son las {now}, y aun faltan operarios por cargar en la app aqui te dejo el listado agrupados por regional para que los carguen lo mas pronto posible"
+    mensaje_incidencias = titulo2 + '\n\n'  
+    for i in range(len(anti_join2)):   
+      FALTANTES = str((anti_join2['REGIONAL'].iloc[i])) +' ❌' + '\n Numero de faltantes: ' +  str((anti_join2['OPERARIO'].iloc[i])) 
+      mensaje_incidencias += FALTANTES + '\n\n'
+    contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
+  else:
+    mensaje_incidencias = f"Son las {now}, y los operarios fueron cargados exitosamente ✅\n " "Felicitaciones a mi creador Gustavo Boada 🎉🎉 Por crearme y esforzarse para automatizar el trabajo"
+    contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
 
 if __name__=='__main__':
-  
   updater = Updater(token, use_context=True)
   dp = updater.dispatcher
   dp.add_handler(CommandHandler('start', start))
   dp.add_handler(CommandHandler('Incidencias', Incidencias))
-  dp.add_handler(CommandHandler('print_chat_id', print_chat_id))
+  dp.add_handler(CommandHandler('id', id))
   dp.add_handler(CommandHandler('Inasistencias', Inasistencias))
   dp.add_handler(CommandHandler('Reposos', Reposos))
   dp.add_handler(CommandHandler('Permisos', Permisos))
@@ -452,14 +466,12 @@ if __name__=='__main__':
   actualizar(contexto)
   job_queue = updater.job_queue
   job_queue.run_repeating(actualizar, interval=300, first=0)
-  job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=16, minute=31, second=0))
+  job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=16, minute=50, second=0))
+  job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=17, minute=0, second=40))
+  job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=18, minute=20, second=0))
+  job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=18, minute=30, second=40))
+  job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=19, minute=50, second=0))
+  job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=20, minute=0, second=40))
   updater.start_polling()
-  # Crea una instancia de BackgroundScheduler
-  #sched = BackgroundScheduler()
-   # Verificamos que se envie el mensaje programado en los dias correspondientes
- 
-  #sched.add_job(recordatorio, 'cron', hour=16, minute=19, args=[dp])
-  #sched.start()
   print('Estoy Corriendo cada 5 minutos')
- 
   updater.idle()
