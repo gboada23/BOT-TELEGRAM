@@ -5,7 +5,6 @@ from credenciales import token,key,gc
 import logging
 from datetime import time as dt_time
 
-
 key_query = '1Rq6Kf2SxoPv6JFX1VDoTOnRJGoad89wUWlTlvUy0PFs'
 # Configurar el registro de errores
 logging.basicConfig(
@@ -267,15 +266,16 @@ def Renuncias(update, context):
 
 def Todas(update, context):
     global faltas
-    if not faltas.empty:
+    if not faltas.empty and len(faltas)<=40:
         titulo1 = f"Incidencias del Día {hoy}"
         mensaje_incidencias = titulo1 + '\n\n'
-
         for i in range(len(faltas)):
             INCIDENCIAS = str((faltas['Operario'].iloc[i])) +'\n' + str((faltas['Regional'].iloc[i])) +'\n' + str((faltas['Agencia'].iloc[i])) + '\n' + str((faltas['Asistencia'].iloc[i])) + '\n' + str((faltas["Novedad"].iloc[i]))
             mensaje_incidencias += INCIDENCIAS + '\n\n'
-
         context.bot.send_message(chat_id=update.effective_chat.id, text=mensaje_incidencias)
+    elif not faltas.empty and len(faltas)>=40:
+        mensaje = "hay mas de 40 incidencias solicitalas por separado accediendo a estos comandos, /Inasistencias , /Permisos , /Reposos"
+        context.bot.send_message(chat_id=update.effective_chat.id, text=mensaje)
     else:
         no = f"✅ Personal del día {hoy} completo"
         update.message.reply_text(no)
@@ -424,22 +424,22 @@ def recordar(contexto):
   global anti_join
   global anti_join2
   now = datetime.now().strftime("%I:%M %p")
-  if anti_join.empty == False and len(anti_join)< 15:
-    titulo2 = "ALERTA ⚠️\n\n" + f"Son las {now}, y aún faltan operarios por cargar en la app. aqui te dejo el listado para que los carguen lo mas pronto posible"
+  if anti_join.empty == False and len(anti_join)< 35:
+    titulo2 = "ALERTA ⚠️\n\n" + f"@Saanchezfj Son las {now}, y aún faltan operarios por cargar en la app. aqui te dejo el listado para que los carguen lo mas pronto posible"
     mensaje_incidencias = titulo2 + '\n\n'
     for i in range(len(anti_join)):
         FALTANTES = str((anti_join['OPERARIO'].iloc[i])) +' ❌'+ '\n' + str((anti_join['REGIONAL'].iloc[i])) + '\n' + str((anti_join['AGENCIA'].iloc[i]))
         mensaje_incidencias += FALTANTES + '\n\n'
     contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
-  elif anti_join.empty == False and len(anti_join)>= 15:
-    titulo2 = "ALERTA ⚠️\n\n" + f"Son las {now}, y aun faltan operarios por cargar en la app aqui te dejo el listado agrupados por regional para que los carguen lo mas pronto posible"
+  elif anti_join.empty == False and len(anti_join)>= 35:
+    titulo2 = "ALERTA ⚠️\n\n" + f"Son las {now}, y aun faltan mas de 30 operarios por cargar en la app aqui te dejo el listado agrupados por regional para que los carguen lo mas pronto posible"
     mensaje_incidencias = titulo2 + '\n\n'  
     for i in range(len(anti_join2)):   
       FALTANTES = str((anti_join2['REGIONAL'].iloc[i])) +' ❌' + '\n Numero de faltantes: ' +  str((anti_join2['OPERARIO'].iloc[i])) 
       mensaje_incidencias += FALTANTES + '\n\n'
     contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
   else:
-    mensaje_incidencias = f"Son las {now}, y los operarios fueron cargados exitosamente ✅\n " "Felicitaciones a mi creador Gustavo Boada 🎉🎉 Por crearme y esforzarse para automatizar el trabajo"
+    mensaje_incidencias = f"Son las {now}, y los operarios fueron cargados exitosamente ✅\n " " Proceso Autlomatizado Creamos equipos a tus Servicios"
     contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
 
 if __name__=='__main__':
