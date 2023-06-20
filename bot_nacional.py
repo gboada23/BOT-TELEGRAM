@@ -151,9 +151,10 @@ def start(update, context):
         '3. 📅 /Fin_semana de los Supervisores y Operarios\n\n'\
         '4. 👥 /Duplicados del dia de hoy \n\n'\
         '5. ⚠️ /Vacantes disponibles\n\n'\
-        '6. 📊 /Dashboard Muestra el Dashboard de los operarios \n\n\n\n'
+        '6. 📊 /Dashboard Muestra el Dashboard de los operarios \n\n'
         '7. 📨 /Archivo_bolsas Se crea un archivo de operarios a recibir Bolsas\n\n'\
-        '8. 🚩 /Actualizar_BD (NO EJECUTAR )Solo usar para actualizar la BD de la APP', parse_mode='HTML')
+        '8. 📧 /Contacto Muestra la informacion de mi creador\n\n'\
+        '9. 🚩 /Actualizar_BD (NO EJECUTAR )Solo usar para actualizar la BD de la APP', parse_mode='HTML')
 
 def Actualizar_BD(update, context):
   global nuevo
@@ -439,13 +440,18 @@ def recordar(contexto):
       mensaje_incidencias += FALTANTES + '\n\n'
     contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
   else:
-    mensaje_incidencias = f"Son las {now}, y los operarios fueron cargados exitosamente ✅\n " " Proceso Autlomatizado Creamos equipos a tus Servicios"
+    mensaje_incidencias = f"A las {now}, los operarios fueron cargados exitosamente ✅\n " "Proceso Automatizado Creamos equipos a tus Servicios"
     contexto.bot.send_message(chat_id=-1001835769403, text=mensaje_incidencias)
+
+def Contacto(update, contexto):
+  mensaje= "Informacion del Coordinador de Datos. \n\n\n" "Telefono: +584126050914 \n\n" "Correo: gustavoserviplus@gmail.com \n\n" "Lindedin: https://www.linkedin.com/in/gboada23/ \n\n" "Github: https://github.com/gboada23 \n"
+  contexto.bot.send_message(chat_id=update.effective_chat.id, text=mensaje)
 
 if __name__=='__main__':
   updater = Updater(token, use_context=True)
   dp = updater.dispatcher
   dp.add_handler(CommandHandler('start', start))
+  dp.add_handler(CommandHandler('Contacto', Contacto))
   dp.add_handler(CommandHandler('Incidencias', Incidencias))
   dp.add_handler(CommandHandler('id', id))
   dp.add_handler(CommandHandler('Inasistencias', Inasistencias))
