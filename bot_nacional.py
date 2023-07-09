@@ -12,10 +12,9 @@ logging.basicConfig(
     level=logging.ERROR)
 
 def error(update, context):
-   
     "Manejar las excepciones"
     logging.error(f'Error: {context.error}')
-    update.message.reply_text('Hubo un error. Pero sigo trabajando')
+    update.message.reply_text('"Hubo un error ❌". \n Probablemente el servidor donde me estoy ejecutando no tiene buen internet, verifica su conexion o intentalo nuevamente en 2 minutos')
 
 # Agregar el manejador de errores
 contexto = CallbackContext
@@ -162,13 +161,13 @@ def Actualizar_BD(update, context):
     # Obtener la hoja de cálculo correspondiente
   valores = nuevo.values.tolist()
   destino = gc.open('BD NACIONAL OPERARIOS').worksheet('BD')
-  rango_destino = 'A2:R370'
+  rango_destino = 'A2:R381'
   for fila in valores:
       for i, valor in enumerate(fila):
           if isinstance(valor, (int, float)):
               fila[i] = str(valor)
   destino.update(rango_destino, valores)
-  context.bot.send_message(chat_id=update.effective_chat.id, text='Los datos se han Actualizado exitosamente ✅')
+  context.bot.send_message(chat_id=update.effective_chat.id, text='La Base de Datos de la APP de Nacionales se ha actualizado exitosamente ✅')
   
 
 def Fin_semana(update, context):
@@ -367,7 +366,7 @@ def Bolsas(update, context):
   data_mes = ASISTENCIA_NEW[(ASISTENCIA_NEW['fecha'].apply(lambda x: datetime.strptime(x.strftime('%Y-%m-%d'), '%Y-%m-%d')) >= inicio) & (ASISTENCIA_NEW['fecha'].apply(lambda x: datetime.strptime(x.strftime('%Y-%m-%d'), '%Y-%m-%d')) <= final)]
   asistencia = data_mes.groupby(['Operario', 'Asistencia']).size().unstack(fill_value=0)
   asistencia = asistencia.reset_index()
-  noreciben_bolsa = asistencia[asistencia['INASISTENTE']  >=3] 
+  noreciben_bolsa = asistencia[asistencia['INASISTENTE']  >=1] 
   noreciben_bolsa = noreciben_bolsa.loc[:,['Operario','ASISTENTE','INASISTENTE']]
   # hoja donde se almacenaran las datas de las bolsas
   hoja_calculo = gc.open('BOLSAS NACIONALES')
@@ -477,10 +476,8 @@ if __name__=='__main__':
   job_queue.run_repeating(actualizar, interval=180, first=0)
   job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=16, minute=50, second=0))
   job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=17, minute=0, second=0))
-  job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=18, minute=20, second=0))
-  job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=18, minute=30, second=0))
-  job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=19, minute=50, second=0))
-  job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=20, minute=0, second=0))
+  job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=18, minute=50, second=0))
+  job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=19, minute=0, second=0))
   job_queue.run_daily(recordatorio, days=(0, 1, 2, 3, 4), time=dt_time(hour=20, minute=50, second=0))
   job_queue.run_daily(recordar, days=(0, 1, 2, 3, 4), time=dt_time(hour=21, minute=0, second=0))
   updater.start_polling()
